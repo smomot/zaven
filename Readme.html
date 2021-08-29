@@ -1,0 +1,52 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Ticket System</title>
+</head>
+<body>
+
+    <h1 id="ticket-system">Ticket System</h1>
+<h2 id="description">Description</h2>
+<p>Ticket system is an application that provides separate api's for administrator and customer, to create events and make appointments to that events.</p>
+<h3 id="interface">Interface</h3>
+<p>By default, sysytem provides two different api's.</p>
+<p><a href="">http://localhost:5007/</a></p>
+<p><a href="">http://localhost:5008/</a></p>
+<p>In addition to this, it is possible to test those interfaces by swagger.</p>
+<p><a href="">http://localhost:5007/swagger/index.html</a></p>
+<p><a href="">http://localhost:5008/swagger/index.html</a></p>
+<h4 id="ordering-api">Ordering Api</h4>
+<p>Ordering interface provides functionality for customer to make and manage an appoinment.</p>
+<h4 id="catalog-api">Catalog Api</h4>
+<p>Catalog interface provides functionality for administrator to manage eventn's catalog.</p>
+<h3 id="storage">Storage</h3>
+<p>Tickest systems use MongoDb database. In development mode, the database servers starts in docker container.
+You can find and manage configuration in docker-compose file.
+The system hovever use classes that allow cooperate with Azure Cosmo DB after few changes.</p>
+<h3 id="queuing-mechanism">Queuing mechanism</h3>
+<p>Ticket system contains two microservices.
+Making update by administrator in events catalog, should be visible in ordering service.
+Ordering service contains additional database, that recreates catalog from catalog service.
+This creation is done by comunication with messaging system base on Rabbit MQ container in development mode.
+The system has additional configuration for Azure Service Bus for production mode.</p>
+<p>You can find configuration for rabbit mq in docker-compose file.<br />
+Communication, between services and queue mechanism is support by Dapr library.</p>
+<h4 id="dapr">Dapr</h4>
+<p>Communication between ordering and catalog service is supported by Dapr libraries.
+Dapr aprovides simple implementation of different components by provide sideway services that already
+contain implementation.</p>
+<p>You can find dapr sideway components configuration in Services/Dapr catalog.
+In addtion to this docker compose contains main configuration, between services and their sideways and sideways to sideways.</p>
+<p>You can find more by read docekr-compose config, looking for elements :</p>
+<ul>
+<li>catalogapi-dapr</li>
+<li>ordering-dapr</li>
+</ul>
+<h4 id="configuration">Configuration</h4>
+<p>You can manipulate different settings, including connections strings to database in docker-compose for orderingapi and catalogapi
+elements.</p>
+<p>Queing system can be configured by making changes in Dapr catalog, where dapr components are described.</p>
+
+
+</body>
+</html>

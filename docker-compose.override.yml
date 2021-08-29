@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+
+  nosqldb:
+   container_name: nosqldb
+   restart: always
+   ports:
+        - "27017:27017"
+   volumes: 
+        - ${WEBAPP_STORAGE_HOME}/site:/data/db
+
+  rabbitmq:
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  catalogapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "DatabaseSettings:ConnectionString=mongodb://nosqldb:27017"
+    ports:
+      - "5008:80"
+      - "52000:50001"
+
+  orderingapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - "DatabaseSettings:ConnectionString=mongodb://nosqldb:27017"
+    ports:
+      - "5007:80"
+      - "51000:50001"
+volumes:
+  mongo_data:
+   external: false

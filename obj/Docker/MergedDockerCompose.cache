@@ -1,0 +1,85 @@
+services:
+  catalogapi:
+    build:
+      context: C:\Users\S│awomir Momot\source\repos\Ticket_System
+      dockerfile: src/Services/Catalog/Catalog.Api/Catalog.Api/Dockerfile
+    depends_on:
+      nosqldb:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings:ConnectionString: mongodb://nosqldb:27017
+    image: catalogapi
+    ports:
+    - published: 5008
+      target: 80
+    - published: 52000
+      target: 50001
+  catalogapi-dapr:
+    command:
+    - ./daprd
+    - -app-id
+    - catalogapi
+    - -app-port
+    - '80'
+    depends_on:
+      catalogapi:
+        condition: service_started
+    image: daprio/daprd:latest
+    network_mode: service:catalogapi
+  nosqldb:
+    container_name: nosqldb
+    image: mongo
+    ports:
+    - published: 27017
+      target: 27017
+    restart: always
+    volumes:
+    - /site:/data/db:rw
+  ordering-dapr:
+    command:
+    - ./daprd
+    - -app-id
+    - orderingapi
+    - -app-port
+    - '80'
+    - -components-path
+    - /components
+    depends_on:
+      orderingapi:
+        condition: service_started
+    image: daprio/daprd:latest
+    network_mode: service:orderingapi
+    volumes:
+    - C:\Users\S│awomir Momot\source\repos\Ticket_System\dapr\components:/components:rw
+  orderingapi:
+    build:
+      context: C:\Users\S│awomir Momot\source\repos\Ticket_System
+      dockerfile: src/Services/Ordering/Ordering.Api/Ordering.Api/Dockerfile
+    depends_on:
+      nosqldb:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      DatabaseSettings:ConnectionString: mongodb://nosqldb:27017
+    image: orderingapi
+    ports:
+    - published: 5007
+      target: 80
+    - published: 51000
+      target: 50001
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    ports:
+    - published: 5672
+      target: 5672
+    - published: 15672
+      target: 15672
+version: '3.9'
+volumes:
+  mongo_data:
+    external: false

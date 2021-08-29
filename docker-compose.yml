@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+  nosqldb:
+    image: mongo
+
+  catalogapi:
+    image: ${DOCKER_REGISTRY-}catalogapi
+    build:
+      context: .
+      dockerfile: src/Services/Catalog/Catalog.Api/Catalog.Api/Dockerfile
+    depends_on:
+      - rabbitmq
+      - nosqldb
+
+  orderingapi:
+    image: ${DOCKER_REGISTRY-}orderingapi
+    build:
+      context: .
+      dockerfile: src/Services/Ordering/Ordering.Api/Ordering.Api/Dockerfile
+    depends_on:
+      - rabbitmq
+      - nosqldb
+
+  catalogapi-dapr:
+    image: "daprio/daprd:latest"
+    command: [ "./daprd", "-app-id", "catalogapi", "-app-port", "80" ]
+    depends_on:
+      - catalogapi
+    network_mode: "service:catalogapi"
+
+  ordering-dapr:
+    image: "daprio/daprd:latest"
+    command: [ "./daprd", "-app-id", "orderingapi", "-app-port", "80", "-components-path", "/components" ]
+    volumes:
+      - "./dapr/components/:/components" 
+    depends_on:
+      - orderingapi
+    network_mode: "service:orderingapi"
+
+
+
